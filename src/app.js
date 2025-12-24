@@ -3,16 +3,27 @@ const express=require("express");
 const app=express();
 port=7777;
 
-app.use("/",(req,res)=>{
-    res.send("hello adarsh"); //ordering matter if this is at the top most route...route below never get chance to execute.
+app.get("/user",(req,res)=>{
+    // res.send({"name":"adarsh raj","age":"19"});
+    console.log(req.query);
+    res.send("hi"+req.query.name);
 })
 
-app.use("/test",(req,res)=>{
-    res.send("hello world");
+// defining dynamic route 
+app.get("/product/:name/:id",(req,res)=>{
+    console.log(req.params.name);
+    res.send(req.params);
 })
-app.use("/hi",(req,res)=>{
-    res.send("hi hi hi");
+app.post("/user",(req,res)=>{
+    console.log("data sent successfully");
+    res.send("post request recieved");
 })
+app.put("/user",(req,res)=>{
+    let user=req.query;
+    console.log(user);
+    res.send(user);
+})
+
 app.listen(port,()=>{
     console.log("server is listening");
 })
