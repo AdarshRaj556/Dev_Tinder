@@ -6,14 +6,19 @@ port=7777;
 
 app.post("/signup", async (req,res)=>{
     let body="";
-    let date_now=Date.now();
+    // let date_now=Date.now();
     req.on("data", chunk => {
         body += chunk.toString();
     });
     req.on("end",async ()=>{
         console.log(body);
-        console.log(Date.now()-date_now);
+        const data=JSON.parse(body);
+        const  user=new User(data);
+        console.log(data);
+        await user.save()
+        // console.log(Date.now()-date_now);
     })
+    // console.log(user);
     // console.log(body);
     // try{
     //     await user.save();
