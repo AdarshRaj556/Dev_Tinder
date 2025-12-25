@@ -4,29 +4,18 @@ const User=require("./models/user");
 const app=express();
 port=7777;
 
+app.use(express.json());
 app.post("/signup", async (req,res)=>{
-    let body="";
-    // let date_now=Date.now();
-    req.on("data", chunk => {
-        body += chunk.toString();
-    });
-    req.on("end",async ()=>{
-        console.log(body);
-        const data=JSON.parse(body);
-        const  user=new User(data);
-        console.log(data);
-        await user.save()
-        // console.log(Date.now()-date_now);
-    })
+    const user=new User(req.body);
     // console.log(user);
     // console.log(body);
-    // try{
-    //     await user.save();
-    //     res.send("user saved successfully");
-    // }catch(err){
-    //     res.status(400).send("something went wrong "+ err);
-    // }
-    res.send("happy");
+    try{
+        await user.save();
+        res.send("user saved successfully");
+    }catch(err){
+        res.status(400).send("something went wrong "+ err);
+    }
+    // res.send("happy");
 })
 
 connectDB()
