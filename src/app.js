@@ -34,7 +34,7 @@ app.get("/user/:id", async (req,res)=>{
 app.get("/user", async (req,res)=>{
     // console.log(req.body);
     try{
-        const users=await User.find({firstName : req.body.firstName});
+        const users=await User.find({emailId : req.body.emailId});
         if(users.length===0){
             res.status(404).send("No user found");
         }else{
