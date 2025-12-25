@@ -5,20 +5,23 @@ const app=express();
 port=7777;
 
 app.post("/signup", async (req,res)=>{
-    const user=new User({
-        firstName:"saloni",
-        lastName:"kumari",
-        gender:"female",
-        emailId:"saloni&gmail.com",
-        password:"saloni123",
-        age:17
+    let body="";
+    let date_now=Date.now();
+    req.on("data", chunk => {
+        body += chunk.toString();
+    });
+    req.on("end",async ()=>{
+        console.log(body);
+        console.log(Date.now()-date_now);
     })
-    try{
-        await user.save();
-        res.send("user saved successfully");
-    }catch(err){
-        res.status(400).send("something went wrong "+ err);
-    }
+    // console.log(body);
+    // try{
+    //     await user.save();
+    //     res.send("user saved successfully");
+    // }catch(err){
+    //     res.status(400).send("something went wrong "+ err);
+    // }
+    res.send("happy");
 })
 
 connectDB()
