@@ -12,9 +12,10 @@
   "main": "index.js",
   "scripts": {
     "start": "node ./src/app.js",
-    "devs":"nodemon ./src/app.js"
+    "devs": "nodemon ./src/app.js"
   },
   "dependencies": {
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "mongoose": "^9.0.2"
   }
 }
