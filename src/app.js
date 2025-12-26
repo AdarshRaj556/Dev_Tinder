@@ -56,6 +56,58 @@ app.get("/feed",async (req,res)=>{
         res.send("something went wrong "+err);
     }
 })
+
+app.patch("/user", async (req,res)=>{
+    try{
+        const userId=req.body.userId;
+        // const data=req.body.data;   nothing is req.data 
+        console.log(req.body);
+        console.log(data);
+        const user= await User.findByIdAndUpdate(userId,req.body);
+        if(!user){
+            res.status(404).send("user not found");
+        }else{
+            res.send("succesful");
+        }
+    }catch(err){
+        res.send("something went wrong "+err);
+    }
+})
+
+app.delete("/user", async (req,res)=>{
+    try{
+        const email=req.body.emailId;
+
+        const user=await User.deleteOne({emailId:email});
+        console.log(user);
+        if(!user){
+            res.status(404).send("user not found");
+        }else{
+            // console.log(user);
+            res.send("user deletd successfully");
+        }
+    }catch(err){
+        res.send("something went wrong"+ err);
+    }
+})
+
+app.delete("/user", async (req,res)=>{
+    try{
+        const userId=req.body.userId;
+        // console.log(userId);
+        const user= await  User.findByIdAndDelete(userId);
+        console.log(user);
+        if(!user){
+            res.status(404).send("user not found");
+        }else{
+            // console.log(user);
+            res.send("user deletd successfully");
+        }
+    }catch(err){
+        res.send("something went wrong "+err);
+    }
+})
+
 connectDB()
 .then(()=>{
         app.listen(port,()=>{
