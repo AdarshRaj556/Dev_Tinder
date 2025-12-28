@@ -1,15 +1,26 @@
 const express=require("express");
 const connectDB=require("./config/database");
 const User=require("./models/user");
+const bcrypt=require('bcrypt');
+const validateSignup=require('./utils/validate');
 const app=express();
 port=7777;
 
 app.use(express.json());
 app.post("/signup", async (req,res)=>{
-    const user=new User(req.body);
     // console.log(user);
     // console.log(body);
     try{
+        validateSignup(req);
+        const {firstName,lastName,password,emailId}=req.body;
+        const passwordHash= await bcrypt.hash(password,10);
+        const data={
+            firstName,
+            lastName,
+            password:passwordHash,
+            emailId
+        }
+        const user=new User(data);
         await user.save();
         res.send("user saved successfully");
     }catch(err){
@@ -17,6 +28,25 @@ app.post("/signup", async (req,res)=>{
     }
     // res.send("happy");
 })
+
+app.post("/login", async (req,res)=>{
+    try{
+        const {emailId,password}=req.body;
+        const user=await User.findOne({emailId:emailId});
+        if(!user){
+            throw new Error("Incorrect credentials");
+        }
+        const isValidPassword=await bcrypt.compare(password,user.password);
+        if(isValidPassword){
+            res.send("login successful");
+        }else{
+            throw new Error("Incorrect crendentials");
+        }
+    }catch(err){
+        res.status(400).send("something went wrong "+ err);
+    }
+})
+
 app.get("/user/:id", async (req,res)=>{
     // console.log(req.body);
     try{
