@@ -51,6 +51,11 @@ const userSchema=new mongoose.Schema(
         photoUrl:{
             type:String,
             default:"https://img.icons8.com/?size=512w&id=bzulMXqKAC0I&format=png",
+            validate(value){
+                if(!validator.isURL(value)){
+                    throw new Error("PhotoUrl is not Url");
+                }
+            }
         },
         about:{
             type:String,
@@ -61,6 +66,7 @@ const userSchema=new mongoose.Schema(
             type:[String],
             validate(value){
                 if(value.length>10){
+                    throw new Error("can't be more than 10 skills ");
                     return false;
                 }else{
                     return true;

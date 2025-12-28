@@ -57,9 +57,23 @@ app.get("/feed",async (req,res)=>{
     }
 })
 
-app.patch("/user", async (req,res)=>{
+app.patch("/user/:userId", async (req,res)=>{
     try{
-        const {userId,...updateData}=req.body;
+        const userId=req.params?.userId;
+        const allowedUpdates=["age","about","photoUrl","password", "skills","gender"];
+        const data=req.body;
+        for (let key in data){
+            let flag=0;
+            for(let i=0;i<allowedUpdates.length;i++){
+                if(key==allowedUpdates[i]){
+                    flag=1;
+                    break;
+                }
+            }
+            if(flag==0){
+                throw new Error("non editable");
+            }
+        }
         // const data=req.body.data;   nothing is req.data 
         console.log(userId);
         // console.log(req.body);
