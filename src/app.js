@@ -59,11 +59,13 @@ app.get("/feed",async (req,res)=>{
 
 app.patch("/user", async (req,res)=>{
     try{
-        const userId=req.body.userId;
+        const {userId,...updateData}=req.body;
         // const data=req.body.data;   nothing is req.data 
-        console.log(req.body);
-        console.log(data);
-        const user= await User.findByIdAndUpdate(userId,req.body);
+        console.log(userId);
+        // console.log(req.body);
+        // console.log(data);
+        const user= await User.findByIdAndUpdate({_id:userId},req.body,{returnDocument:"after",runValidators:true});
+        console.log(user);
         if(!user){
             res.status(404).send("user not found");
         }else{
@@ -74,6 +76,20 @@ app.patch("/user", async (req,res)=>{
     }
 })
 
+// app.patch("/user",async (req,res)=>{
+//     try{
+//         const email=req.body.emailId;
+//         const user = await User.findOne({ emailId: email });
+//         if(!user){
+//             res.status(404).send("user not found");
+//         }else{
+//             res.send("succesful");
+//         }
+
+//     }catch(err){
+//         res.send("something went wrong "+err);
+//     }
+// })
 app.delete("/user", async (req,res)=>{
     try{
         const email=req.body.emailId;
