@@ -2,9 +2,11 @@ const express=require("express");
 const connectDB=require("./config/database");
 const User=require("./models/user");
 const bcrypt=require('bcrypt');
+const validator=require('validator');
 const validateSignup=require('./utils/validate');
 const cookieParser=require('cookie-parser');
 const jwt=require("jsonwebtoken");
+const {userAuth}= require("./middlewares/auth");
 const app=express();
 port=7777;
 
@@ -78,10 +80,10 @@ app.post("/login", async (req,res)=>{
         if(!user){
             throw new Error("Incorrect credentials");
         }
-        const isValidPassword=await bcrypt.compare(password,user.password);
+        const isValidPassword= user.validatePassword(password);
         if(isValidPassword){
-            const token=jwt.sign({_id:user._id},"Dev@Tinder$234");
-            res.cookie("token",token);
+            const token= user.getJWT();
+            res.cookie("token",token,{expires: new Date(Date.now()+ 60*60*1000*24)});
             res.send("login successful");
         }else{
             throw new Error("Incorrect crendentials");
@@ -91,10 +93,33 @@ app.post("/login", async (req,res)=>{
     }
 })
 
-
-app.get("/profile", async (req,res)=>{
+app.post("/sendconnectionrequest/:emailId",userAuth,async (req,res)=>{
+    try{
+        const user=req.user;
+        const email=req.params?.emailId;
+        if(!validator.isEmail(email)){
+            throw new Error("not a email id");
+        }
+        const friend= await User.findOne({emailId:email});
+        if(!email){
+            throw new Error("email is required field");
+        }
+        if(email==user.emailId){
+            throw new Error("you can not send email to yourself");
+        }
+        if(!friend){
+            throw new Error("No user found with this email id");
+        }
+        res.send(user.firstName +" sent a friend request to "+ friend.firstName);
+    }catch(err){
+        res.status(400).send("something went wrong " +err);
+    }
+})
+app.get("/profile",userAuth,async (req,res)=>{
     try{
         const {token}=(req.cookies);
+        // console.log(typeof(req));
+        // console.log(res);
         if(!token){
             throw new Error("Go back to login page");
         }
@@ -104,7 +129,7 @@ app.get("/profile", async (req,res)=>{
         if(!user){
             throw new Error("user not found");
         }
-        console.log(user);
+        // console.log(user);
         res.send(user);
 
     }catch(err){
