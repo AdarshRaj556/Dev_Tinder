@@ -3,9 +3,51 @@ const connectDB=require("./config/database");
 const User=require("./models/user");
 const bcrypt=require('bcrypt');
 const validateSignup=require('./utils/validate');
+const cookieParser=require('cookie-parser');
+const jwt=require("jsonwebtoken");
 const app=express();
 port=7777;
 
+    //.                            * implementation of cookie parser*
+// function cookieParser(req){
+//     const str=req.headers?.cookie;
+//     if(!str) return {};
+//     const cookie={};
+//     let key="",value="";
+//     let flag=0;
+//     for(let i=0;i<str.length;i++){
+//         if(str[i]==' ')continue;
+//         if(str[i]==';'){
+//             cookie[key]=decodeURIComponent(value);
+//             key="",value="";
+//             flag=0;
+//             continue;
+//         }
+//         if(str[i]=="="){
+//             flag=1;
+//             continue;
+//         }
+//         if(flag==0){
+//             key+=str[i];
+//         }else{
+//             value+=str[i];
+//         }
+//     }
+
+//     if(key.length!=0){
+//         cookie[key]=decodeURIComponent(value);
+//     }
+//     return cookie
+// }
+
+// app.use((req,res,next)=>{
+//     req.cookies=cookieParser(req);
+//     next();
+// });
+
+
+
+app.use(cookieParser());
 app.use(express.json());
 app.post("/signup", async (req,res)=>{
     // console.log(user);
@@ -38,12 +80,35 @@ app.post("/login", async (req,res)=>{
         }
         const isValidPassword=await bcrypt.compare(password,user.password);
         if(isValidPassword){
+            const token=jwt.sign({_id:user._id},"Dev@Tinder$234");
+            res.cookie("token",token);
             res.send("login successful");
         }else{
             throw new Error("Incorrect crendentials");
         }
     }catch(err){
         res.status(400).send("something went wrong "+ err);
+    }
+})
+
+
+app.get("/profile", async (req,res)=>{
+    try{
+        const {token}=(req.cookies);
+        if(!token){
+            throw new Error("Go back to login page");
+        }
+        const decodedMessage= await jwt.verify(token,"Dev@Tinder$234");
+        const {_id}=decodedMessage;
+        const user=await User.findById(_id);
+        if(!user){
+            throw new Error("user not found");
+        }
+        console.log(user);
+        res.send(user);
+
+    }catch(err){
+        res.send("something went wrong "+err);
     }
 })
 
