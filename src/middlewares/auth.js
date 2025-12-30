@@ -1,5 +1,6 @@
 const User= require("../models/user");
 const jwt=require("jsonwebtoken");
+const {SECRET_KEYS}=require("../secret_keys");
 const adminaAuth=(req,res,next)=>{
     let token="xya";
     if(token=="xyz"){
@@ -15,7 +16,7 @@ const userAuth= async (req,res,next)=>{
         if(!token){
             throw new Error("invalid token");
         }
-        const message=await jwt.verify(token,"Dev@Tinder$234");
+        const message=await jwt.verify(token,SECRET_KEYS);
         const {_id}=message;
         const user= await User.findById(_id);
         if(!user){

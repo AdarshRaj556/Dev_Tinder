@@ -13,4 +13,20 @@ const validateSignup=(req)=>{
     }
 }
 
-module.exports=validateSignup;
+const validateIfUpatable=function (req){
+    const allowedUpdates=["firstName","lastName","photoUrl","age","skills","about","gender"];
+    for(let key in req.body){
+        let flag=0;
+        for(let i=0;i<allowedUpdates.length;i++){
+            if(key===allowedUpdates[i]){
+                flag=1;
+            }
+        }
+        if(flag==0){
+            return false;
+        }
+    }
+    return true;
+}
+
+module.exports={validateSignup,validateIfUpatable};

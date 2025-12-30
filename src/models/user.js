@@ -2,6 +2,7 @@ const mongoose=require("mongoose");
 const validator=require("validator");
 const bcrypt=require("bcrypt");
 const jwt=require("jsonwebtoken");
+const {SECRET_KEYS}=require("../secret_keys");
 const userSchema=new mongoose.Schema(
     {
         firstName:{
@@ -82,7 +83,7 @@ const userSchema=new mongoose.Schema(
 );
 
 userSchema.methods.getJWT=function (){
-    const token= jwt.sign({_id:this._id},"Dev@Tinder$234",{expiresIn:'1d'});
+    const token= jwt.sign({_id:this._id},SECRET_KEYS,{expiresIn:'1d'});
     return token;
     
 }

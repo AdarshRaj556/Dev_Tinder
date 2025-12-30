@@ -1,8 +1,7 @@
 const express=require('express');
-const validateSignup=require('../utils/validate');
+const {validateSignup}=require('../utils/validate');
 const bcrypt=require('bcrypt');
 const User=require("../models/user");
-
 const authRouter=express.Router();
 
 authRouter.post("/signup", async (req,res)=>{
@@ -12,13 +11,8 @@ authRouter.post("/signup", async (req,res)=>{
         validateSignup(req);
         const {firstName,lastName,password,emailId}=req.body;
         const passwordHash= await bcrypt.hash(password,10);
-        const data={
-            firstName,
-            lastName,
-            password:passwordHash,
-            emailId
-        }
-        const user=new User(data);
+        req.body.password=passwordHash
+        const user=new User(req.body);
         await user.save();
         res.send("user saved successfully");
     }catch(err){
@@ -47,5 +41,10 @@ authRouter.post("/login", async (req,res)=>{
         res.status(400).send("something went wrong "+ err);
     }
 });
+
+authRouter.post("/logout",async (req,res)=>{
+    res.cookie("token",null,{expires: new Date(Date.now())});
+    res.send("logged out successfully");
+})
 
 module.exports=authRouter;
