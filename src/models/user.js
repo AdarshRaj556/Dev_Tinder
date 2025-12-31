@@ -21,13 +21,18 @@ const userSchema=new mongoose.Schema(
         },
         age:{
             type:Number,
+            required:true,
             min:18,
             max:120,
         },
         gender:{
             type:String,
-            enum:["male","female","others"],
-
+            lowercase:true,
+            enum:{
+                values:["male","female","others"],
+                message:`{VALUE} not allowed `
+            },
+            default:"others"
         },
         emailId:{
             type:String,

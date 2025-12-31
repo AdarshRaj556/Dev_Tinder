@@ -2,30 +2,49 @@ const express=require("express");
 const validator=require('validator');
 const User=require("../models/user");
 const {userAuth}=require("../middlewares/auth");
+const ConnectionRequest=require("../models/connectionRequest");
 const requestRouter=express.Router();
 
-requestRouter.post("/sendconnectionrequest/:emailId",userAuth,async (req,res)=>{
+requestRouter.post("/request/send/:status/:toUserId",userAuth,async (req,res)=>{
     try{
         const user=req.user;
-        const email=req.params?.emailId;
-        if(!validator.isEmail(email)){
-            throw new Error("not a email id");
+        const status=req.params.status;
+        const toUserId=req.params.toUserId;
+        const fromUserId=user._id;
+        if(fromUserId.equals(toUserId)){ //we can use pre function also (implemented already)
+            throw new Error("you can't send request to yourself");
         }
-        const friend= await User.findOne({emailId:email});
-        if(!email){
-            throw new Error("email is required field");
+        const toUser=await User.findById(toUserId);
+        if(!toUser){
+            throw new Error("No user with this user Id");
         }
-        if(email==user.emailId){
-            throw new Error("you can not send email to yourself");
+        if(status!="interested" && status!="ignored"){
+            throw new Error("Not valid status");
         }
-        if(!friend){
-            throw new Error("No user found with this email id");
+        const isRequestSentAlready1= await ConnectionRequest.findOne({toUserId,fromUserId});
+        const isRequestSentAlready2= await ConnectionRequest.findOne({toUserId:fromUserId,fromUserId:toUserId});
+        if(isRequestSentAlready1 || isRequestSentAlready2){
+            throw new Error("Request Sent already");
         }
-        res.send(user.firstName +" sent a friend request to "+ friend.firstName);
+        const data={
+            toUserId,fromUserId,status
+        }
+        const connectionRequest=new ConnectionRequest(data);
+        await connectionRequest.save();
+        res.json({
+            message:
+            status === "interested"
+                ? `Request sent successfully to ${toUser.firstName}`
+                : `You have ignored ${toUser.firstName}`,
+            data
+        });
+
     }catch(err){
         res.status(400).send("something went wrong " +err);
     }
 });
+
+
 
 
 module.exports=requestRouter;
