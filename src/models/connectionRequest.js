@@ -30,13 +30,13 @@ connectionRequestSchema.index({fromUserId:1,toUserId:1});
 
 
 //better practice but check this at top is more benificial
-// connectionRequestSchema.pre("save",function (next){
-//     if(this.fromUserId.equals(this.toUserId)){
-//         throw new Error("you can't request to yourself");
-//     }
-//     next();
-// })
- 
+connectionRequestSchema.pre("save", function (next) {
+    if (this.fromUserId.equals(this.toUserId)) {
+        return next(new Error("You can't send a request to yourself"));
+    }
+    next();
+});
+
 
 const ConnectionRequest=new mongoose.model("connectionRequest",connectionRequestSchema);
 
