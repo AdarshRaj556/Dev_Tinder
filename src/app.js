@@ -1,11 +1,6 @@
 const express=require("express");
 const connectDB=require("./config/database");
-const User=require("./models/user");
-const bcrypt=require('bcrypt');
-const validator=require('validator');
 const cookieParser=require('cookie-parser');
-const jwt=require("jsonwebtoken");
-const {userAuth}= require("./middlewares/auth");
 const app=express();
 
 port=7777;
@@ -16,131 +11,9 @@ app.use(express.json());
 const authRouter=require("./routes/auth");
 const profileRouter=require("./routes/profile");
 const requestRouter=require("./routes/request");
+const userRouter=require("./routes/user");
 
-
-app.use("/",authRouter,profileRouter,requestRouter);
-
-
-app.get("/user/:id", async (req,res)=>{
-    // console.log(req.body);
-    try{
-        const {id}=req.params
-        const user=await User.findById(id);
-        if(!user){
-            res.status(404).send("user not found");
-        }else{
-            res.send(user);
-        }
-    }catch(err){
-        res.send("something went wrong "+err);
-    }
-})
-app.get("/user", async (req,res)=>{
-    // console.log(req.body);
-    try{
-        const users=await User.find({emailId : req.body.emailId});
-        if(users.length===0){
-            res.status(404).send("No user found");
-        }else{
-            res.send(users);
-        }
-    }catch(err){
-        res.send("something went wrong "+err);
-    }
-})
-app.get("/feed",async (req,res)=>{
-    try{
-        const users=await User.find({});
-        if(users.length===0){
-            res.status(404).send("No user found");
-        }else{
-            res.send(users);
-        }
-    }catch(err){
-        res.send("something went wrong "+err);
-    }
-})
-
-app.patch("/user/:userId", userAuth,async (req,res)=>{
-    try{
-        const userId=req.params?.userId;
-        const allowedUpdates=["age","about","photoUrl","password", "skills","gender"];
-        const data=req.body;
-        for (let key in data){
-            let flag=0;
-            for(let i=0;i<allowedUpdates.length;i++){
-                if(key==allowedUpdates[i]){
-                    flag=1;
-                    break;
-                }
-            }
-            if(flag==0){
-                throw new Error("non editable");
-            }
-        }
-        // const data=req.body.data;   nothing is req.data 
-        console.log(userId);
-        // console.log(req.body);
-        // console.log(data);
-        const user= await User.findByIdAndUpdate({_id:userId},req.body,{returnDocument:"after",runValidators:true});
-        console.log(user);
-        if(!user){
-            res.status(404).send("user not found");
-        }else{
-            res.send("succesful");
-        }
-    }catch(err){
-        res.send("something went wrong "+err);
-    }
-})
-
-// app.patch("/user",async (req,res)=>{
-//     try{
-//         const email=req.body.emailId;
-//         const user = await User.findOne({ emailId: email });
-//         if(!user){
-//             res.status(404).send("user not found");
-//         }else{
-//             res.send("succesful");
-//         }
-
-//     }catch(err){
-//         res.send("something went wrong "+err);
-//     }
-// })
-app.delete("/user", async (req,res)=>{
-    try{
-        const email=req.body.emailId;
-
-        const user=await User.deleteOne({emailId:email});
-        console.log(user);
-        if(!user){
-            res.status(404).send("user not found");
-        }else{
-            // console.log(user);
-            res.send("user deletd successfully");
-        }
-    }catch(err){
-        res.send("something went wrong"+ err);
-    }
-})
-
-app.delete("/user", async (req,res)=>{
-    try{
-        const userId=req.body.userId;
-        // console.log(userId);
-        const user= await  User.findByIdAndDelete(userId);
-        console.log(user);
-        if(!user){
-            res.status(404).send("user not found");
-        }else{
-            // console.log(user);
-            res.send("user deletd successfully");
-        }
-    }catch(err){
-        res.send("something went wrong "+err);
-    }
-})
+app.use("/",authRouter,profileRouter,requestRouter,userRouter);
 
 connectDB()
 .then(()=>{
